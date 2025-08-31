@@ -4,3 +4,4 @@ __pycache__/
 .env
 ALL_TESTS/
 faiss_test/
+.java-version
