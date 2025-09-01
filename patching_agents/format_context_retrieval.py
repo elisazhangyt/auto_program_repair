@@ -1,31 +1,26 @@
 from typing import Tuple, List
 from tree_sitter import Node
 
+import sys
+import os
+# Add the context_retrieval directory to the path
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'context_retrieval'))
 import isolate_bug as ib
 import retrieval_utils as utils
 from joern_callgraph import JoernSession
-
-import os
 
 # Get paths from environment variables with fallbacks
 JOERN_EXECUTABLE = os.getenv('JOERN_EXECUTABLE', '/usr/local/bin/joern')
 JOERN_DIRECTORY = os.getenv('JOERN_DIRECTORY', '/usr/local/share/joern')
 JAVA_FILE_PATH = os.getenv('JAVA_FILE_PATH', 'test_programs/test_program.java')
 
-'''
-Types of context to retrieve:
-- call graph- callee and caller sites for each buggy method/constructor
-- ddg for buggy variables
-'''
 
-'''
-Format of each type of context:
-- file path, line number(s), content/text
-'''
+# TODO: how much context to provide? is whole node enough, or do we provide the whole node + the program
+# for reference?
 
  # Provide a list of tuples in the form of (file path, bug locations). The bug locations should be given
  # as a list of tuples in the form of (start line number, end line number).
-def format_info(all_bug_locations: List[Tuple[str, List[Tuple[int, int]]]]) -> str:
+def format_context(context_type: str, all_bug_locations: List[Tuple[str, List[Tuple[int, int]]]]) -> str:
     result = ''
     bug_number = 1
 
@@ -40,23 +35,37 @@ def format_info(all_bug_locations: List[Tuple[str, List[Tuple[int, int]]]]) -> s
         for bug_in_file in bugs_in_file:
             bug_location, bug_code, buggy_node_info = bug_in_file
             buggy_node_location, buggy_node = buggy_node_info
-            comments_before_node = utils.get_comments_before_node(java_file_path, buggy_node)
             buggy_node = utils.get_node_text(buggy_node, code)
-            if comments_before_node:
-                comments_text = utils.get_node_text(comments_before_node, code)
-            else:
-                comments_text = "No comments found"
             result += f'Bug #{bug_number}:\n'
             result += f'File path: {java_file_path}\n'
             result += f'Bug line number(s): {bug_location}\n'
             result += f'Bug lines: {bug_code}'
             result += f'Buggy node line number(s): {buggy_node_location}\n'
             result += f'Buggy node: {buggy_node}\n'
-            result += f'Comments before buggy node: {comments_text}\n'
+            if context_type == "context retrieval":
+                comments_before_node = utils.get_comments_before_node(java_file_path, buggy_node)
+                if comments_before_node:
+                    comments_text = utils.get_node_text(comments_before_node, code)
+                else:
+                    comments_text = "No comments found"
+                result += format_context_retrieval(comments_text, java_file_path, bug_location)
+            if context_type == "api database retrieval":
+                # TODO: result += format_api_database_retrieval(buggy_node_location, buggy_node, comments_text)
+                pass
             bug_number += 1
             result += '\n'
     return result
 
+def format_context_retrieval(comments_text: str, java_file_path: str, bug_location: Tuple[int, int]) -> str:
+    result = ""
+    result += f'Comments before buggy node: {comments_text}\n'
+    result += format_callgraph_info(java_file_path, bug_location)
+    result += format_ddg_info(java_file_path, bug_location)
+    return result
+
+def format_api_database_retrieval() -> str:
+    # TODO
+    pass
 
 # TODO: fix json parsing
 def format_callgraph_info(java_file_path: str, bug_location: Tuple[int, int]) -> str:

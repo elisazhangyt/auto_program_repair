@@ -10,24 +10,23 @@ class MessageHistory:
 
     def __init__(self, messages=None):
         self.messages: list[dict] = messages or []
-
-    def add(self, role: str, message: str):
+    
+    def add_prompt(self, role: str, message: str):
         """
-        Add a new message to the thread.
+        Add a new prompt to the thread.
+        Args:
+            message (str): The content of the new prompt.
+        """
+        self.messages.append({"role": "prompt", "content": message})
+
+    def add_agent(self, role: str, message: str):
+        """
+        Add a new agent response to the thread.
         Args:
             message (str): The content of the new message.
-            role (str): The role of the new message.
+            role (str): The role of the agent giving the message.
         """
         self.messages.append({"role": role, "content": message})
-
-    def add_system(self, message):
-        self.messages.append({"role": "system", "content": message})
-
-    def add_user(self, message: str):
-        self.messages.append({"role": "user", "content": message})
-
-    def add_model(self, message: str):
-        self.messages.append({"role": "assistant", "content": message})
 
     def to_msg(self) -> list[dict]:
         """

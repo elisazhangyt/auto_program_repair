@@ -3,10 +3,6 @@ import sys
 import os
 from openai import OpenAI
 
-# Add the parent directory to the path to find config
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
-from config.settings import GPT_MODEL
 from typing import List
 import openai
 
@@ -23,7 +19,8 @@ class GPTClient:
     def send_prompt(self, prompt):
         client = OpenAI(api_key=self.api_key)
         
-        response = client.chat.completions.create(model=GPT_MODEL,
+        gpt_model = os.environ.get("GPT_MODEL", "gpt-4-turbo-2024-04-09")
+        response = client.chat.completions.create(model=gpt_model,
         messages=[{"role": "user", "content": prompt}])
         
         return response

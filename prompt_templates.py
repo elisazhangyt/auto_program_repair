@@ -15,5 +15,4 @@ Suggest the full code instead of partial code or code changes.
 # TODO: Add the return format of the patch (.java file)
 """
 
-
 # TODO: prompts for basic, api, repair pattern, and chain of thought agents

@@ -7,15 +7,15 @@ import isolate_bug as ib
 import retrieval_utils as utils
 from typing import Tuple
 
-class BasicAgent(AbstractAgent):
+class ApiAgent(AbstractAgent):
     def get_prompt(self) -> str:
         return self.format_context()
     
     def get_agent_role(self) -> str:
-        return "basic"
+        return "api"
     
     def format_context(self) -> str:
-        """Format basic context without additional analysis"""
+        """Format context with API database information"""
         bug_locations = self.information.get_info("bug files and locations")
         result = ''
         bug_number = 1
@@ -39,8 +39,16 @@ class BasicAgent(AbstractAgent):
                 result += f'Buggy node line number(s): {buggy_node_location}\n'
                 result += f'Buggy node: {buggy_node}\n'
                 
+                # API database specific additions
+                result += self.format_api_database_retrieval(buggy_node_location, buggy_node)
+                
                 bug_number += 1
                 result += '\n'
         return result
+    
+    def format_api_database_retrieval(self, buggy_node_location: Tuple[int, int], buggy_node: str) -> str:
+        """Format API database retrieval information"""
+        # TODO: Implement API database retrieval
+        return "API database information: [To be implemented]\n"
     
     

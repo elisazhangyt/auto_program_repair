@@ -1,6 +1,6 @@
 import info_dict
-import context_agent
-import basic_agent
+from context_agent import ContextAgent
+from basic_agent import BasicAgent
 
 SYSTEM_DESCRIPTION = """
 The task is to generate a patch for the buggy Java code.
@@ -17,15 +17,17 @@ Suggest the full code instead of partial code or code changes.
 Return the patch as a .java file.
 """
 
-buggy_file_path = '../test_programs/chart1.java'
+BASIC_PROMPT = "Fix the buggy code."
+
+import os
+buggy_file_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'test_programs', 'chart15.java')
 
 information = info_dict.InfoDict()
-information.create_info_dict(SYSTEM_DESCRIPTION, buggy_file_path, [(1795, 1799)])
+information.create_info_dict(SYSTEM_DESCRIPTION, [(buggy_file_path, [(1379, 1379), (2051, 2052)])])
 
-context_retriever = context_agent.ContextAgent(information)
-context_retriever.get_initial_context()
+context_retriever = ContextAgent(information)
 
-basic_agent = basic_agent.BasicAgent(information)
-result, msg_history = basic_agent.run("Fix the buggy code.")
+basicagent = BasicAgent(information)
+result, msg_history = basicagent.run(BASIC_PROMPT)
 print(msg_history)
 
